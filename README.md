@@ -1,47 +1,72 @@
 # Template API
 
-## Setup:
+FastAPI template with browser automation, task workers, and monitoring stack.
+
+## Setup
+
 ```bash
 uv sync
 ```
 
-### Start with uv
+## Run
+
+### Local app
+
 ```bash
 uv run app
 ```
 
-### Start with docker
+### Docker Compose
+
 ```bash
 docker compose up --build -d
 ```
 
-## Pre-commit hooks
+## Browser Automation
 
-Install and setup pre-commit hooks:
-```bash
-uv sync --group dev
-pre-commit install
-```
+`BrowserPool` supports autoscaling and context pooling:
 
-Run hooks manually:
-```bash
-pre-commit run --all-files
-```
+- default browser limit: `APP__PLAYWRIGHT__MAX_BROWSERS=2`
+- default contexts per browser: `APP__PLAYWRIGHT__CONTEXTS_PER_BROWSER=5`
+- max parallel browser contexts by default: `2 * 5 = 10`
 
-## CLI:
+You can tune this via `.env`:
+
+- `APP__PLAYWRIGHT__HEADLESS`
+- `APP__PLAYWRIGHT__MAX_BROWSERS`
+- `APP__PLAYWRIGHT__CONTEXTS_PER_BROWSER`
+
+## Browser Emulation Service
+
+Compose service `emulation` runs Playwright worker with Xvfb + VNC + noVNC.
+
+- VNC: `localhost:5901`
+- noVNC: `http://localhost:6081/vnc.html`
+
+## CLI
 
 ### Create migration
+
 ```bash
 uv run cli migration
 ```
 
-### Upgrade database with alembic
+### Upgrade database with Alembic
+
 ```bash
 uv run cli upgrade
 ```
 
+## Pre-commit
+
+```bash
+uv sync --group dev
+pre-commit install
+pre-commit run --all-files
+```
+
 ## Monitoring
 
-- **Grafana**: http://localhost:3000 (admin/admin)
-- **Prometheus**: http://localhost:9090
-- **Loki**: http://localhost:3100
+- Grafana: `http://localhost:3000` (`admin/admin`)
+- Prometheus: `http://localhost:9090`
+- Loki: `http://localhost:3100`
