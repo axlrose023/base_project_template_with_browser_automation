@@ -16,6 +16,5 @@ def setup_logging(env: Literal["local", "dev", "prod"]) -> None:
         logging.basicConfig(level=logging.INFO, format=LOG_FORMAT_PROD)
         logging.info("Logging is set to INFO level")
 
-    logging.getLogger("aiogram").setLevel(logging.INFO)
-    logging.getLogger("aiogram_dialog").setLevel(logging.INFO)
-    logging.getLogger("telethon").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)

@@ -11,10 +11,15 @@ from app.database.engine import SessionFactory
 from app.database.uow import UnitOfWork
 from app.settings import Config, get_config
 
+try:
+    from app.services.browser import BrowserPool, ContextFactory, UserAgentProvider
+except ModuleNotFoundError:
+    _BROWSER_PROVIDER_ENABLED = False
+else:
+    _BROWSER_PROVIDER_ENABLED = True
+
 
 class AppProvider(Provider):
-    """Application provider for dependency injection."""
-
     @provide(scope=Scope.APP)
     def get_config(self) -> Config:
         return get_config()
@@ -31,8 +36,6 @@ class AppProvider(Provider):
 
 
 class ServicesProvider(Provider):
-    """Services provider for dependency injection."""
-
     @provide(scope=Scope.APP)
     def get_jwt_service(self, config: Config) -> JwtService:
         return JwtService(config)
@@ -50,9 +53,34 @@ class ServicesProvider(Provider):
         return UserService(uow, auth_service)
 
 
+if _BROWSER_PROVIDER_ENABLED:
+    class BrowserProvider(Provider):
+        @provide(scope=Scope.APP)
+        def get_user_agent_provider(self, config: Config) -> UserAgentProvider:
+            return UserAgentProvider(config.useragent)
+
+        @provide(scope=Scope.APP)
+        def get_context_factory(
+            self,
+            user_agent_provider: UserAgentProvider,
+            config: Config,
+        ) -> ContextFactory:
+            return ContextFactory(user_agent_provider, config.viewport)
+
+        @provide(scope=Scope.APP)
+        async def get_browser_pool(self, config: Config) -> AsyncIterator[BrowserPool]:
+            pool = BrowserPool(config=config.playwright)
+            await pool.start()
+            yield pool
+            await pool.stop()
+
+
 def get_async_container() -> AsyncContainer:
-    return make_async_container(
+    providers: list[Provider] = [
         AppProvider(),
         ServicesProvider(),
         HttpClientsProvider(),
-    )
+    ]
+    if _BROWSER_PROVIDER_ENABLED:
+        providers.append(BrowserProvider())
+    return make_async_container(*providers)
