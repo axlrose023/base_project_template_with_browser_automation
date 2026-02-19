@@ -1,4 +1,3 @@
-import subprocess
 from configparser import ConfigParser
 from pathlib import Path
 from typing import Annotated
@@ -19,19 +18,9 @@ alembic_ini_path = Path(__file__).parent.parent.parent / "alembic.ini"
 
 
 def get_alembic_config() -> Config:
-    """Get Alembic configuration."""
     if not alembic_ini_path.exists():
         raise FileNotFoundError("alembic.ini not found")
     return Config("alembic.ini")
-
-
-@app.command()
-def tests(
-    path: Annotated[str, typer.Argument()] = "src/tests",
-) -> None:
-    """Run parallel tests."""
-
-    subprocess.run(["uv", "run", "pytest", path, "-n", "auto"])
 
 
 @app.command("migration")
