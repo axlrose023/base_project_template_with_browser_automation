@@ -37,6 +37,9 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "aiosqlite>=0.21.0",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
     "ruff>=0.14.1",
     "pre-commit>=3.7.0",
 ]

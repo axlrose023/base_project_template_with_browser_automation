@@ -30,3 +30,6 @@ jobs:
 
     - name: Ruff format check
       run: uv run ruff format --check src/
+
+    - name: Run tests
+      run: uv run pytest src/tests/
